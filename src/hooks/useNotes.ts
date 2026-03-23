@@ -10,20 +10,24 @@ export const useNotes = () => {
 
   const [notes, setNotes] = useState<NoteType[]>(loadNotes);
 
+  const latestNotes = useRef(notes);
+
   const [interaction, setInteraction] = useState<ActiveInteraction | null>(null);
   const [isHoveringTrash, setIsHoveringTrash] = useState(false);
   const [activeColor, setActiveColor] = useState('yellow');
   const [activeSize, setActiveSize] = useState<NoteSizePreset>('medium');
 
   useEffect(() => {
+    latestNotes.current = notes;
     saveNotes(notes);
   }, [notes]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent, id: string, mode: 'moving' | 'resizing') => {
-    const note = notes.find(n => n.id === id);
+    const currentNotes = latestNotes.current;
+    const note = currentNotes.find(n => n.id === id);
     if (!note) return;
 
-    const nextZ = getNextZIndex(notes);
+    const nextZ = getNextZIndex(currentNotes);
 
     setNotes(prev => prev.map(n => n.id === id ? { ...n, zIndex: nextZ } : n));
 
@@ -35,7 +39,7 @@ export const useNotes = () => {
         y: e.clientY - note.position.y
       }
     });
-  }, [notes]);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!interaction) return;
