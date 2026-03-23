@@ -1,0 +1,33 @@
+$white: #ffffff;
+$black: #000000;
+$gray: #666666;
+$gray-light: #f5f5f5;
+$gray-dark: #333333;
+
+$note-yellow: #fffb8f;
+$note-blue: #bae6fd;
+$note-green: #bbf7d0;
+$note-pink: #fbcfe8;
+
+$note-colors: (
+    "yellow": $note-yellow,
+    "blue": $note-blue,
+    "green": $note-green,
+    "pink": $note-pink
+);
+
+$board-bg: #f0f2f5;
+
+$black-10: rgba(0, 0, 0, 0.1);
+$black-20: rgba(0, 0, 0, 0.2);
+
+$trash-border: #ff4d4f;
+$trash-bg: rgba(255, 0, 0, 0.1);
+$trash-border-active: #ff4d4f;
+$trash-bg-active: rgba(255, 0, 0, 0.2);
+$trash-size: 100px;
+
+$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+$z-index-base: 10;

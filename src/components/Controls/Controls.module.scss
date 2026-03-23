@@ -1,0 +1,92 @@
+@use '../../styles/variables' as *;
+
+.controlsPanel {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: $white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: $shadow-md;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 1000;
+}
+
+.label {
+    font-family: sans-serif;
+    font-weight: 600;
+    color: $gray-dark;
+}
+
+.sizePicker {
+    display: flex;
+    gap: 8px;
+    background: $gray-light;
+    padding: 4px;
+    border-radius: 6px;
+}
+
+.sizeBtn {
+    background: transparent;
+    border: none;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: $gray;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        color: $gray-dark;
+    }
+
+    &.activeSize {
+        background: $white;
+        color: $black;
+        box-shadow: $shadow-sm;
+    }
+}
+
+.divider {
+    width: 1px;
+    height: 24px;
+    background-color: $gray-light;
+}
+
+.colorPicker {
+    display: flex;
+    gap: 8px;
+}
+
+.colorBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid $black-10;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: $shadow-sm;
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
+
+    &.activeColor {
+        border-color: $gray-dark;
+        transform: scale(1.1);
+    }
+
+    @each $name, $color in $note-colors {
+        &.is-#{$name} {
+            background-color: $color;
+        }
+    }
+}

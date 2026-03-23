@@ -1,0 +1,31 @@
+@use '../../styles/variables' as *;
+
+.board {
+  position: relative;
+  width: 100vw;
+  min-width: 1024px;
+  height: 100vh;
+  background-color: $board-bg;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.trashZone {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: $trash-size;
+  height: $trash-size;
+  background: $trash-bg;
+  border: 2px dashed $trash-border;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.trashActive {
+  transform: scale(1.1);
+  background: $trash-bg-active;
+}
