@@ -19,7 +19,12 @@ export const useNotes = () => {
 
   useEffect(() => {
     latestNotes.current = notes;
-    saveNotes(notes);
+
+    const timeoutId = setTimeout(() => {
+      saveNotes(notes);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
   }, [notes]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent, id: string, mode: 'moving' | 'resizing') => {
