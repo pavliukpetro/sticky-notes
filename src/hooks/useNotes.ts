@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ActiveInteraction, NoteSizePreset, Note as NoteType } from '../types';
 import { isPointInRect } from '../utils/geometry';
-import { getDimensionsFromPreset, getNextZIndex } from '../utils/notes';
+import { getDimensionsFromPreset } from '../utils/notes';
 import { loadNotes, saveNotes } from '../utils/storage';
 
 export const useNotes = () => {
@@ -27,9 +27,13 @@ export const useNotes = () => {
     const note = currentNotes.find(n => n.id === id);
     if (!note) return;
 
-    const nextZ = getNextZIndex(currentNotes);
+    setNotes(prev => {
+      if (prev[prev.length - 1].id === id) return prev;
 
-    setNotes(prev => prev.map(n => n.id === id ? { ...n, zIndex: nextZ } : n));
+      const filteredNotes = prev.filter(n => n.id !== id);
+
+      return [...filteredNotes, note];
+    });
 
     setInteraction({
       noteId: id,
@@ -98,7 +102,6 @@ export const useNotes = () => {
       size: dimensions,
       content: 'Double click to edit...',
       color: activeColor,
-      zIndex: notes.length > 0 ? Math.max(...notes.map(n => n.zIndex)) + 1 : 1,
     };
 
     setNotes((prev) => [...prev, newNote]);

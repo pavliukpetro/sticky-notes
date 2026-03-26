@@ -15,7 +15,6 @@ export const Note: React.FC<NoteProps> = memo(({ note, onMouseDown }) => {
         transform: `translate(${note.position.x}px, ${note.position.y}px)`,
         width: note.size.width,
         height: note.size.height,
-        zIndex: note.zIndex,
       }}
       onMouseDown={(e) => onMouseDown(e, note.id, 'moving')}
     >
@@ -36,7 +35,6 @@ export const Note: React.FC<NoteProps> = memo(({ note, onMouseDown }) => {
     prevProps.note.position.y === nextProps.note.position.y &&
     prevProps.note.size.width === nextProps.note.size.width &&
     prevProps.note.size.height === nextProps.note.size.height &&
-    prevProps.note.zIndex === nextProps.note.zIndex &&
     prevProps.note.color === nextProps.note.color
   );
 });

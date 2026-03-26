@@ -14,10 +14,9 @@ export interface Note {
   size: Dimensions;
   content: string;
   color: string;
-  zIndex: number;
 }
 
-export type InteractionMode = 'moving' | 'resizing' | null;
+export type InteractionMode = 'moving' | 'resizing';
 
 export interface ActiveInteraction {
   noteId: string;

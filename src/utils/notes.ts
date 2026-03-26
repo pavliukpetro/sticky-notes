@@ -8,9 +8,3 @@ export const getDimensionsFromPreset = (size: NoteSizePreset) => {
     default: return { width: 200, height: 200 };
   }
 };
-
-export const getNextZIndex = (notes: { zIndex: number }[]) => {
-    if (notes.length === 0 || notes.length === 1) return 1;
-
-    return Math.max(...notes.map(n => n.zIndex)) + 1;
-};
