@@ -18,6 +18,7 @@ export const Board: React.FC = () => {
     handleMouseMove,
     handleMouseUp,
     handleDoubleClick,
+    updateNoteContent,
   } = useNotes();
 
   return (
@@ -37,7 +38,12 @@ export const Board: React.FC = () => {
       />
 
       {notes.map(note => (
-        <Note key={note.id} note={note} onMouseDown={handleMouseDown} />
+        <Note 
+          key={note.id} 
+          note={note} 
+          onMouseDown={handleMouseDown} 
+          onChangeContent={updateNoteContent} 
+        />
       ))}
 
       <div

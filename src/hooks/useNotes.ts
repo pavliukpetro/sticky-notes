@@ -112,6 +112,14 @@ export const useNotes = () => {
     setNotes((prev) => [...prev, newNote]);
   };
 
+  const updateNoteContent = useCallback((id: string, newContent: string) => {
+    setNotes((prev) =>
+      prev.map((note) =>
+        note.id === id ? { ...note, content: newContent } : note
+      )
+    );
+  }, []);
+
   return {
     boardRef,
     trashRef,
@@ -125,5 +133,6 @@ export const useNotes = () => {
     handleMouseMove,
     handleMouseUp,
     handleDoubleClick,
+    updateNoteContent,
   };
 };
