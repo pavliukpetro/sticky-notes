@@ -1,21 +1,28 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ActiveInteraction, NoteSizePreset, Note as NoteType } from '../types';
-import { isPointInRect } from '../utils/geometry';
-import { getDimensionsFromPreset } from '../utils/notes';
-import { loadNotes, saveNotes } from '../utils/storage';
+import { useCallback, useEffect, useRef, useState } from "react";
+import type {
+  ActiveInteraction,
+  NoteSizePreset,
+  Note as NoteType,
+} from "../types";
+import { isPointInRect } from "../utils/geometry";
+import { getDimensionsFromPreset } from "../utils/notes";
+import { loadNotes, saveNotes } from "../utils/storage";
 
-export const useNotes = () => {
+export const useNotes = (activeTrashClass: string) => {
   const boardRef = useRef<HTMLDivElement>(null);
   const trashRef = useRef<HTMLDivElement>(null);
+  const activeNoteRef = useRef<HTMLDivElement>(null);
 
   const [notes, setNotes] = useState<NoteType[]>(loadNotes);
 
   const latestNotes = useRef(notes);
 
-  const [interaction, setInteraction] = useState<ActiveInteraction | null>(null);
-  const [isHoveringTrash, setIsHoveringTrash] = useState(false);
-  const [activeColor, setActiveColor] = useState('yellow');
-  const [activeSize, setActiveSize] = useState<NoteSizePreset>('medium');
+  const interactionRef = useRef<ActiveInteraction | null>(null);
+
+  const isHoveringTrashRef = useRef(false);
+
+  const [activeColor, setActiveColor] = useState("yellow");
+  const [activeSize, setActiveSize] = useState<NoteSizePreset>("medium");
 
   useEffect(() => {
     latestNotes.current = notes;
@@ -27,70 +34,134 @@ export const useNotes = () => {
     return () => clearTimeout(timeoutId);
   }, [notes]);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent, id: string, mode: 'moving' | 'resizing') => {
-    const currentNotes = latestNotes.current;
-    const note = currentNotes.find(n => n.id === id);
-    if (!note) return;
+  const handleMouseDown = useCallback(
+    (
+      e: React.MouseEvent,
+      id: string,
+      mode: "moving" | "resizing",
+      noteElementRef: HTMLDivElement,
+    ) => {
+      const currentNotes = latestNotes.current;
+      const note = currentNotes.find(n => n.id === id);
+      if (!note) return;
 
-    setNotes(prev => {
-      if (prev[prev.length - 1].id === id) return prev;
+      activeNoteRef.current = noteElementRef;
 
-      const filteredNotes = prev.filter(n => n.id !== id);
+      setNotes((prev) => {
+        if (prev[prev.length - 1].id === id) return prev;
 
-      return [...filteredNotes, note];
-    });
+        const filteredNotes = prev.filter(n => n.id !== id);
 
-    setInteraction({
-      noteId: id,
-      mode,
-      offset: {
-        x: e.clientX - note.position.x,
-        y: e.clientY - note.position.y
-      }
-    });
-  }, []);
+        return [...filteredNotes, note];
+      });
+
+      interactionRef.current = {
+        noteId: id,
+        mode,
+        offset: {
+          x: e.clientX - note.position.x,
+          y: e.clientY - note.position.y,
+        },
+      };
+    },
+    [],
+  );
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!interaction) return;
+    if (!interactionRef.current) return;
 
-    if (interaction.mode === 'moving' && trashRef.current) {
-      const isOverTrash = isPointInRect(e.clientX, e.clientY, trashRef.current.getBoundingClientRect());
+    const activeNoteRefCurrent = activeNoteRef.current;
 
-      setIsHoveringTrash(isOverTrash);
+    if (interactionRef.current.mode === "moving" && trashRef.current) {
+      const isOverTrash = isPointInRect(
+        e.clientX,
+        e.clientY,
+        trashRef.current.getBoundingClientRect(),
+      );
+
+      if (isOverTrash !== isHoveringTrashRef.current) {
+        isHoveringTrashRef.current = isOverTrash;
+
+        trashRef.current!.classList.toggle(
+          activeTrashClass,
+          isOverTrash,
+        );
+      }
     }
 
-    setNotes(prev => prev.map(note => {
-      if (note.id !== interaction.noteId) return note;
+    if (interactionRef.current.mode === "moving") {
+      activeNoteRefCurrent!.style.transform = `translate(${e.clientX - interactionRef.current.offset.x}px, ${e.clientY - interactionRef.current.offset.y}px)`;
+    } else {
+      const currentNote = latestNotes.current.find(
+        (note) => note.id === interactionRef.current?.noteId,
+      );
 
-      if (interaction.mode === 'moving') {
-        return {
-          ...note,
-          position: {
-            x: e.clientX - interaction.offset.x,
-            y: e.clientY - interaction.offset.y
-          }
-        };
-      } else {
-        return {
-          ...note,
-          size: {
-            width: Math.max(100, e.clientX - note.position.x),
-            height: Math.max(100, e.clientY - note.position.y)
-          }
-        };
-      }
-    }));
+      if (!currentNote) return;
+
+      activeNoteRefCurrent!.style.width = `${Math.max(100, e.clientX - currentNote.position.x)}px`;
+      activeNoteRefCurrent!.style.height = `${Math.max(100, e.clientY - currentNote.position.y)}px`;
+    }
   };
 
   const handleMouseUp = () => {
-    if (!interaction) return;
+    if (!interactionRef.current) return;
 
-    if (interaction.mode === 'moving' && isHoveringTrash) {
-      setNotes(prev => prev.filter(note => note.id !== interaction.noteId));
+    if (
+      interactionRef.current.mode === "moving" &&
+      isHoveringTrashRef.current
+    ) {
+      const noteId = interactionRef.current.noteId;
+      activeNoteRef.current = null;
+
+      setNotes((prev) => prev.filter((note) => note.id !== noteId));
+
+      interactionRef.current = null;
+      isHoveringTrashRef.current = false;
+      trashRef.current?.classList.remove(activeTrashClass);
+
+      return;
     }
 
-    setInteraction(null);
-    setIsHoveringTrash(false);
+    if (activeNoteRef.current) {
+      const mode = interactionRef.current.mode;
+      const noteId = interactionRef.current.noteId;
+      const noteEl = activeNoteRef.current;
+
+      setNotes((prev) => {
+        return prev.map((note) => {
+          if (note.id !== noteId) return note;
+
+          if (mode === "moving") {
+            return {
+              ...note,
+              position: {
+                x: parseInt(
+                  noteEl.style.transform
+                    .split("translate(")[1]
+                    .split("px")[0],
+                ),
+                y: parseInt(
+                  noteEl.style.transform
+                    .split(", ")[1]
+                    .split("px)")[0],
+                ),
+              },
+            };
+          } else {
+            return {
+              ...note,
+              size: {
+                width: noteEl.offsetWidth,
+                height: noteEl.offsetHeight,
+              },
+            };
+          }
+        });
+      });
+    }
+
+    interactionRef.current = null;
+    activeNoteRef.current = null;
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
@@ -105,7 +176,7 @@ export const useNotes = () => {
         y: e.clientY,
       },
       size: dimensions,
-      content: 'Double click to edit...',
+      content: "Double click to edit...",
       color: activeColor,
     };
 
@@ -115,8 +186,8 @@ export const useNotes = () => {
   const updateNoteContent = useCallback((id: string, newContent: string) => {
     setNotes((prev) =>
       prev.map((note) =>
-        note.id === id ? { ...note, content: newContent } : note
-      )
+        note.id === id ? { ...note, content: newContent } : note,
+      ),
     );
   }, []);
 
@@ -124,7 +195,6 @@ export const useNotes = () => {
     boardRef,
     trashRef,
     notes,
-    isHoveringTrash,
     activeColor,
     setActiveColor,
     activeSize,

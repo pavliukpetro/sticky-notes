@@ -1,15 +1,15 @@
-import React from 'react';
-import { useNotes } from '../../hooks/useNotes';
-import { Controls } from '../Controls';
-import { Note } from '../Note';
-import styles from './Board.module.scss';
+import React, { useEffect } from "react";
+import { useNotes } from "../../hooks/useNotes";
+import { Controls } from "../Controls";
+import { Note } from "../Note";
+import styles from "./Board.module.scss";
 
 export const Board: React.FC = () => {
   const {
     boardRef,
     trashRef,
     notes,
-    isHoveringTrash,
+    // isHoveringTrash,
     activeColor,
     setActiveColor,
     activeSize,
@@ -19,7 +19,11 @@ export const Board: React.FC = () => {
     handleMouseUp,
     handleDoubleClick,
     updateNoteContent,
-  } = useNotes();
+  } = useNotes(styles.trashActive);
+
+  useEffect(() => {
+    console.log("Notes updated:", notes);
+  }, [notes]);
 
   return (
     <div
@@ -37,19 +41,16 @@ export const Board: React.FC = () => {
         onSizeChange={setActiveSize}
       />
 
-      {notes.map(note => (
-        <Note 
-          key={note.id} 
-          note={note} 
-          onMouseDown={handleMouseDown} 
-          onChangeContent={updateNoteContent} 
+      {notes.map((note) => (
+        <Note
+          key={note.id}
+          note={note}
+          onMouseDown={handleMouseDown}
+          onChangeContent={updateNoteContent}
         />
       ))}
 
-      <div
-        ref={trashRef}
-        className={`${styles.trashZone} ${isHoveringTrash ? styles.trashActive : ''}`}
-      >
+      <div ref={trashRef} className={styles.trashZone}>
         Trash
       </div>
     </div>

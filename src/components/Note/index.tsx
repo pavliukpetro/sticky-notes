@@ -1,16 +1,23 @@
-import React, { memo, useState } from 'react';
-import type { Note as NoteType } from '../../types';
-import styles from './Note.module.scss';
+import React, { memo, useRef, useState } from "react";
+import type { Note as NoteType } from "../../types";
+import styles from "./Note.module.scss";
 
 interface NoteProps {
   note: NoteType;
-  onMouseDown: (e: React.MouseEvent, id: string, mode: 'moving' | 'resizing') => void;
+  onMouseDown: (
+    e: React.MouseEvent,
+    id: string,
+    mode: "moving" | "resizing",
+    noteElementRef: HTMLDivElement,
+  ) => void;
   onChangeContent: (id: string, newContent: string) => void;
 }
 
 export const Note: React.FC<NoteProps> = memo(({ note, onMouseDown, onChangeContent }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(note.content);
+
+  const activeNoteRef = useRef<HTMLDivElement>(null);
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -26,15 +33,21 @@ export const Note: React.FC<NoteProps> = memo(({ note, onMouseDown, onChangeCont
 
   return (
     <div
-      className={`${styles.note} ${styles[`is-${note.color}`] || ''}`}
+      ref={activeNoteRef}
+      className={`${styles.note} ${styles[`is-${note.color}`] || ""}`}
       style={{
         transform: `translate(${note.position.x}px, ${note.position.y}px)`,
         width: note.size.width,
         height: note.size.height,
       }}
       onMouseDown={(e) => {
-        if (!isEditing) {
-          onMouseDown(e, note.id, 'moving');
+        if (!isEditing && activeNoteRef.current) {
+          onMouseDown(
+            e,
+            note.id,
+            "moving",
+            activeNoteRef.current,
+          );
         }
       }}
       onDoubleClick={handleDoubleClick}
@@ -57,7 +70,12 @@ export const Note: React.FC<NoteProps> = memo(({ note, onMouseDown, onChangeCont
         className={styles.resizeHandle}
         onMouseDown={(e) => {
           e.stopPropagation();
-          onMouseDown(e, note.id, 'resizing');
+          onMouseDown(
+            e,
+            note.id,
+            "resizing",
+            activeNoteRef.current!,
+          );
         }}
       />
     </div>
