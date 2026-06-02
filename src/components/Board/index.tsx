@@ -9,7 +9,6 @@ export const Board: React.FC = () => {
     boardRef,
     trashRef,
     notes,
-    // isHoveringTrash,
     activeColor,
     setActiveColor,
     activeSize,
@@ -20,10 +19,6 @@ export const Board: React.FC = () => {
     handleDoubleClick,
     updateNoteContent,
   } = useNotes(styles.trashActive);
-
-  useEffect(() => {
-    console.log("Notes updated:", notes);
-  }, [notes]);
 
   return (
     <div
